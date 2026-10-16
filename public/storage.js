@@ -38,14 +38,14 @@
     await done;
     return { tasks, outbox, lastSync: lastSync?.value || null };
   }
-  async function save(task) {
-    const change = { mutationId: crypto.randomUUID(), task, createdAt: Date.now() };
+  async function save(task, enqueue = true) {
     const db = await openDB();
-    const tx = db.transaction(['tasks', 'outbox'], 'readwrite');
+    const stores = enqueue ? ['tasks', 'outbox'] : ['tasks'];
+    const tx = db.transaction(stores, 'readwrite');
     const done = finished(tx);
     try {
       tx.objectStore('tasks').put(task);
-      tx.objectStore('outbox').add(change);
+      if (enqueue) tx.objectStore('outbox').add({ mutationId: crypto.randomUUID(), task, createdAt: Date.now() });
     } catch (error) {
       tx.abort();
       await done.catch(() => {});

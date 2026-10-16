@@ -12,6 +12,12 @@ Requiere Python 3, sin instalar paquetes adicionales. El iniciador también dete
 
 **No abras index.html con doble clic ni uses solamente Live Server:** necesitas este servidor para que la API guarde los cambios y el service worker funcione desde localhost. La primera visita requiere el servidor activo para descargar la interfaz.
 
+## Publicación en GitHub Pages
+
+El workflow de GitHub Actions valida el servidor Python y la sintaxis de JavaScript en cada cambio. Al actualizar `main`, prepara y publica automáticamente la agenda en **Settings → Pages**. El sitio se publica en <https://kine2003.github.io/Ejercicio-Progresivo/>.
+
+La versión de GitHub Pages guarda las tareas únicamente en el almacenamiento local del navegador (IndexedDB). No ejecuta Python ni SQLite, por lo que los datos no se comparten entre navegadores o dispositivos. Para sincronizar entre navegadores, abre la versión local con `INICIAR.cmd`.
+
 ## Comprobar el funcionamiento sin conexión
 
 1. Abre la agenda normalmente y espera a que termine de sincronizar.

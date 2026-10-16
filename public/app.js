@@ -2,6 +2,7 @@
   'use strict';
   const $ = selector => document.querySelector(selector);
   const form = $('#task-form');
+  const localOnly = globalThis.AGENDA_CONFIG?.localOnly === true;
   let tasks = [], filter = 'all', editingId = null, syncing = false, serverAvailable = false;
   let toastTimer, installPrompt;
   const today = () => {
@@ -17,6 +18,15 @@
     toastTimer = setTimeout(() => { $('#toast').hidden = true; }, 4500);
   }
   function connectionStatus(pending = 0) {
+    if (localOnly) {
+      const badge = $('#connection-badge');
+      badge.textContent = 'Solo este dispositivo';
+      badge.className = 'connection-badge local-only';
+      $('#sync-button').hidden = true;
+      $('#sync-status').textContent = 'Tus tareas se guardan en este navegador y no se sincronizan con otros dispositivos.';
+      $('#last-sync').hidden = true;
+      return;
+    }
     const online = navigator.onLine && serverAvailable;
     const badge = $('#connection-badge');
     badge.textContent = online ? 'En conexión' : navigator.onLine ? 'Servidor sin conexión' : 'Sin conexión';
@@ -84,6 +94,7 @@
     connectionStatus(state.outbox.length);
   }
   async function synchronize(manual = false) {
+    if (localOnly) return;
     if (syncing) return;
     if (!navigator.onLine) {
       await render();
@@ -104,13 +115,14 @@
     }
   }
   async function requestBackgroundSync() {
+    if (localOnly) return;
     try {
       const registration = await navigator.serviceWorker?.getRegistration();
       if (registration && 'sync' in registration) await registration.sync.register('agenda-pending');
     } catch (error) { console.info('Se reintentará al abrir la agenda:', error.message); }
   }
   async function persist(task, message) {
-    await AgendaStorage.save({ ...task, updatedAt: new Date().toISOString() });
+    await AgendaStorage.save({ ...task, updatedAt: new Date().toISOString() }, !localOnly);
     await render(); toast(message);
     void requestBackgroundSync(); void synchronize();
   }
@@ -160,11 +172,13 @@
     void render();
   });
   $('#sync-button').addEventListener('click', () => void synchronize(true));
-  window.addEventListener('online', () => void synchronize());
-  window.addEventListener('offline', () => { serverAvailable = false; void render(); });
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) void synchronize(); });
-  // Reintento incluso si la red vuelve sin emitir el evento online.
-  setInterval(() => { if (!document.hidden) void synchronize(); }, 15000);
+  if (!localOnly) {
+    window.addEventListener('online', () => void synchronize());
+    window.addEventListener('offline', () => { serverAvailable = false; void render(); });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) void synchronize(); });
+    // Reintento incluso si la red vuelve sin emitir el evento online.
+    setInterval(() => { if (!document.hidden) void synchronize(); }, 15000);
+  }
   window.addEventListener('beforeinstallprompt', event => { event.preventDefault(); installPrompt = event; $('#install-button').hidden = false; });
   $('#install-button').addEventListener('click', async () => {
     if (!installPrompt) return;
@@ -174,7 +188,7 @@
   async function setupOffline() {
     if (!('serviceWorker' in navigator)) { $('#offline-ready').textContent = 'Usa un navegador compatible para abrir sin conexión.'; return; }
     try {
-      await navigator.serviceWorker.register('/sw.js');
+      await navigator.serviceWorker.register('./sw.js');
       await navigator.serviceWorker.ready;
       $('#offline-ready').textContent = 'Agenda disponible sin conexión';
       navigator.serviceWorker.addEventListener('message', event => {
@@ -185,7 +199,15 @@
   async function start() {
     $('#today-label').textContent = new Intl.DateTimeFormat('es-EC', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
     resetForm();
-    try { await render(); void setupOffline(); await synchronize(); }
+    try {
+      if (localOnly) {
+        $('#sync-heading').textContent = 'Guardado local';
+        $('#queue-count').closest('.sync-summary').hidden = true;
+        $('.connection-panel details').hidden = true;
+      }
+      await render(); void setupOffline();
+      if (!localOnly) await synchronize();
+    }
     catch (error) {
       $('#sync-status').textContent = 'No se pudo abrir el almacenamiento local. Habilita los datos del sitio y recarga.';
       $('#task-list').setAttribute('aria-busy', 'false'); $('#save-button').disabled = true;
