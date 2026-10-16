@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#172b4d">
+  <meta name="description" content="Agenda estudiantil que guarda tus tareas sin conexión y sincroniza al reconectarte.">
+  <title>Mi Agenda · Tareas de clase</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="stylesheet" href="/styles.css">
+  <script defer src="/storage.js"></script>
+  <script defer src="/sync.js"></script>
+  <script defer src="/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Mi Agenda, inicio">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="4" width="22" height="25" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M11 2v6m10-6v6M10 14h12m-12 6h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Mi Agenda<span class="brand-label">ESTUDIANTE</span>
+    </a>
+    <div class="header-actions">
+      <button id="install-button" class="button button-quiet" hidden>Instalar agenda</button>
+      <span id="connection-badge" class="connection-badge" role="status">Conectando…</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="eyebrow">TU ESPACIO DE ESTUDIO</p><h1 id="page-title">Una tarea a la vez.</h1><p class="intro-copy">Organiza tus entregas, incluso sin conexión.</p></div>
+      <div class="today"><span>HOY</span><strong id="today-label"></strong></div>
+    </section>
+
+    <section class="summary" aria-label="Resumen de tareas">
+      <div><span>Por completar</span><strong id="pending-count">0</strong></div>
+      <div><span>Completadas</span><strong id="completed-count">0</strong></div>
+      <div class="sync-summary"><span>Cambios por enviar</span><strong id="queue-count">0</strong></div>
+    </section>
+
+    <div class="workspace">
+      <section class="task-panel" aria-labelledby="task-heading">
+        <div class="panel-heading"><h2 id="task-heading">Mis tareas</h2><span id="task-total" class="subtle"></span></div>
+        <div class="filters" role="group" aria-label="Mostrar tareas">
+          <button class="filter active" data-filter="all" aria-pressed="true">Todas</button>
+          <button class="filter" data-filter="pending" aria-pressed="false">Pendientes</button>
+          <button class="filter" data-filter="completed" aria-pressed="false">Completadas</button>
+        </div>
+        <div id="task-list" class="task-list" aria-busy="true"></div>
+        <div id="empty-state" class="empty-state" hidden><span class="empty-symbol" aria-hidden="true">✓</span><h3 id="empty-title">Tu agenda está lista</h3><p id="empty-copy">Añade tu primera tarea para comenzar.</p></div>
+      </section>
+
+      <aside>
+        <section class="form-panel" aria-labelledby="form-heading">
+          <div class="panel-heading"><h2 id="form-heading">Nueva tarea</h2><span class="form-mark" aria-hidden="true">+</span></div>
+          <form id="task-form">
+            <label for="title">¿Qué necesitas hacer?</label>
+            <input id="title" name="title" placeholder="Ej.: terminar el ejercicio de JavaScript" required maxlength="160" autocomplete="off">
+            <label for="subject">Materia</label>
+            <input id="subject" name="subject" placeholder="Ej.: Desarrollo de plataformas" required maxlength="80" autocomplete="off">
+            <div class="form-row">
+              <div><label for="due-date">Fecha de entrega</label><input id="due-date" name="dueDate" type="date" min="0001-01-01" max="9999-12-31" required></div>
+              <div><label for="priority">Prioridad</label><select id="priority" name="priority"><option value="normal">Normal</option><option value="high">Alta</option><option value="low">Baja</option></select></div>
+            </div>
+            <button type="submit" id="save-button" class="button button-primary">Guardar tarea</button>
+            <button type="button" id="cancel-edit" class="button button-quiet cancel-edit" hidden>Cancelar edición</button>
+            <p class="form-note">Tus tareas se guardan en este dispositivo al instante.</p>
+          </form>
+        </section>
+
+        <section class="connection-panel" aria-labelledby="sync-heading">
+          <div class="panel-heading"><h2 id="sync-heading">Conexión y respaldo</h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8a10 10 0 0 1 16 0M7 11a6 6 0 0 1 10 0m-7 3a2 2 0 0 1 4 0m-2 3h.01"/></svg></div>
+          <p id="sync-status" role="status" aria-live="polite">Cargando tus tareas guardadas…</p>
+          <p id="last-sync" class="subtle">Todavía no se ha sincronizado.</p>
+          <button id="sync-button" class="button button-outline">Sincronizar ahora</button>
+          <details><summary>Cómo probar sin conexión</summary><p>Primero abre la agenda con el servidor activo. Después pulsa <kbd>F12</kbd>, entra en <strong>Network / Red</strong> y elige <strong>Offline</strong>. Crea o edita una tarea y recarga. Al volver a <strong>No throttling / Sin limitación</strong>, los cambios se enviarán automáticamente.</p></details>
+        </section>
+      </aside>
+    </div>
+    <footer><span>Mi Agenda · Ejercicio de aplicación web progresiva</span><span id="offline-ready">Preparando acceso sin conexión…</span></footer>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <noscript>Activa JavaScript para guardar y sincronizar tus tareas.</noscript>
+</body>
+</html>

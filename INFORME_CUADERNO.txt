@@ -1,0 +1,32 @@
+INFORME ACADÉMICO
+DESARROLLO DE UNA AGENDA ESTUDIANTIL COMO APLICACIÓN WEB PROGRESIVA
+
+Estudiante: ______________________________
+Asignatura: ______________________________
+Docente: _________________________________
+Fecha: __________________________________
+
+1. INTRODUCCIÓN
+La interrupción de la conexión puede dificultar el uso de aplicaciones web. Para abordar esta situación, se desarrolló una agenda estudiantil que permite gestionar tareas y conservar modificaciones localmente. El proyecto aplica los contenidos de Fetch API e IndexedDB revisados en el material de la semana 5 y los complementa con recursos de una aplicación web progresiva.
+
+2. OBJETIVO
+Implementar una aplicación que permita registrar, editar, completar y eliminar tareas sin conexión, y sincronizar los cambios cuando se restablezca la comunicación con el servidor.
+
+3. FUNDAMENTO TÉCNICO
+Fetch API permite realizar solicitudes HTTP asíncronas e intercambiar datos en formato JSON. IndexedDB proporciona almacenamiento persistente en el navegador (Material de clase, s. f., pp. 14–19). Un service worker permite conservar los archivos de la interfaz en caché para acceder a ellos sin conexión (MDN Web Docs, s. f.). El manifiesto describe la aplicación y permite su instalación en navegadores compatibles.
+
+4. METODOLOGÍA Y DESARROLLO
+Se construyó la interfaz con HTML y CSS, incluyendo un formulario, una lista de tareas e indicadores de conexión. Mediante JavaScript se programaron las acciones del usuario y las validaciones. Posteriormente, se implementó IndexedDB para almacenar las tareas y una cola de modificaciones pendientes. Se incorporaron el service worker y el manifiesto. Finalmente, se desarrolló un servidor Python con SQLite para conservar los datos sincronizados.
+
+Cada modificación guarda la tarea y su operación pendiente en una misma transacción local. Al recuperar conexión, Fetch API envía los cambios mediante POST a /api/sync y consulta los datos mediante GET a /api/tasks. Se comprueba response.ok y solo se retiran de la cola las operaciones confirmadas por el servidor. Ante fallos, se mantienen para reintentarlas.
+
+5. RESULTADOS Y VERIFICACIÓN
+Se realizaron pruebas funcionales en navegador y de integración de la API. Incluyeron creación, edición, finalización y eliminación de tareas sin conexión. La página y los datos permanecieron disponibles al recargar, después de una primera visita con el servidor activo. Al restablecer la comunicación con la página abierta, las modificaciones se sincronizaron y el contador de cambios pendientes llegó a cero. También se verificó que un error del servidor conservara la cola y que otro perfil del navegador recuperara los datos guardados. La evaluación se realizó en un entorno local.
+
+6. CONCLUSIONES
+La implementación cumplió el objetivo de conservar tareas sin conexión y sincronizarlas posteriormente. IndexedDB proporcionó persistencia local, el service worker permitió recuperar la interfaz y Fetch API facilitó el intercambio con el servidor. La confirmación de operaciones y los reintentos permitieron conservar los cambios durante los fallos comprobados.
+
+7. REFERENCIAS
+Material de clase. (s. f.). Semana 5 teoría [PDF], pp. 14–19 y 21.
+MDN Web Docs. (s. f.). Using Service Workers.
+https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers
