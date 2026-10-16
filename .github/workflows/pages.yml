@@ -44,8 +44,6 @@ jobs:
           grep -q 'localOnly: true' dist/config.js
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:
